@@ -17,3 +17,4 @@ infrastructure will be recorded here.
 - Architecture, contribution, review, roadmap, and convention documentation.
 - Initial Sobolev and mesh representation RFCs.
 - Chinese project and collaboration documentation, including a Chinese homepage.
+- Just the Docs 0.12.0 homepage with navigation, search, MathJax 3, and a getting-started page.
