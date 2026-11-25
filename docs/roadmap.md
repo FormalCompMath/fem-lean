@@ -1,5 +1,7 @@
 # Roadmap
 
+[中文版本](zh-CN/roadmap.md)
+
 Progress is measured by complete, reviewed mathematical nodes, not by book-page
 percentage, lines of code, or commits.
 
@@ -11,8 +13,8 @@ percentage, lines of code, or commits.
 - [x] Add issue and PR templates.
 - [x] Add architecture, review, and contribution policies.
 - [x] Generate blueprint and documentation infrastructure.
-- [ ] Complete a clean remote build and deploy the project website.
-- [ ] Configure branch protection and the live project board.
+- [x] Complete a clean remote build and deploy the project website.
+- [x] Configure branch protection and the live project board.
 
 ## M1 — Abstract variational core
 

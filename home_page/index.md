@@ -2,6 +2,8 @@
 usemathjax: true
 ---
 
+[中文文档]({{ site.url }}/zh-CN/)
+
 FemLean is a Lean 4 library for reusable, machine-checked finite element theory.
 Its first vertical slice is abstract Galerkin theory, a Poisson model problem,
 and a two-dimensional \(P_1\) energy-error estimate.

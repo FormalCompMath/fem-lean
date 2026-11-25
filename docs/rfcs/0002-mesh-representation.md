@@ -1,5 +1,7 @@
 # RFC 0002: Mesh representation
 
+[中文版本](../zh-CN/rfcs/0002-mesh-representation.md)
+
 - Status: Under review
 - Decision: pending
 - Target milestone: M3

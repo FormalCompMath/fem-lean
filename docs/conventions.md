@@ -1,5 +1,7 @@
 # Lean conventions
 
+[中文版本](zh-CN/conventions.md)
+
 FemLean follows current Mathlib conventions unless a documented project-specific
 reason requires otherwise.
 

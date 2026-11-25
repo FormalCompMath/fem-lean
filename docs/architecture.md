@@ -1,5 +1,7 @@
 # Architecture
 
+[中文版本](zh-CN/architecture.md)
+
 ## Design goal
 
 FemLean should grow by adding modules, not by repeatedly modifying every existing

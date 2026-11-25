@@ -1,5 +1,7 @@
 # Review and trust policy
 
+[中文版本](zh-CN/review.md)
+
 ## Trust model
 
 Lean checks whether a proof term has the stated type. Humans must still check

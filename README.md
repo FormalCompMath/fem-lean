@@ -1,14 +1,16 @@
 # FormalCompMath FemLean
 
+[中文文档](README.zh-CN.md)
+
 A Lean 4 library for reusable, machine-checked finite element theory, using
 Dietrich Braess's *Finite Elements* as a mathematical roadmap rather than as a
 file-by-file translation target.
 
 ## Status
 
-The project is at the infrastructure milestone. The first mathematical milestone
-is an abstract Galerkin layer culminating in Céa's lemma, followed by a Poisson
-model and a two-dimensional \(P_1\) energy-error theorem.
+The infrastructure is in place and the project is starting its first mathematical
+milestone: an abstract Galerkin layer culminating in Céa's lemma, followed by a
+Poisson model and a two-dimensional \(P_1\) energy-error theorem.
 
 ## Development
 
