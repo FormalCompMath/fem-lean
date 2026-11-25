@@ -5,6 +5,9 @@ on:
     branches:
       - main
   pull_request:
+  schedule:
+    # 02:23 Beijing time; refresh the complete API documentation nightly.
+    - cron: '23 18 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -23,16 +26,19 @@ jobs:
     name: Detect documentation changes
     runs-on: ubuntu-24.04
     outputs:
-      lean: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.lean }}
-      blueprint: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.blueprint }}
-      homepage: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.homepage }}
-      workflow: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.filter.outputs.workflow }}
+      lean: ${{ steps.filter.outputs.lean }}
+      api: ${{ steps.filter.outputs.api }}
+      blueprint: ${{ steps.filter.outputs.blueprint }}
+      homepage: ${{ steps.filter.outputs.homepage }}
+      workflow: ${{ steps.filter.outputs.workflow }}
     steps:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
 
       - name: Classify changed files
-        if: github.event_name != 'workflow_dispatch'
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         id: filter
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
@@ -40,6 +46,12 @@ jobs:
             lean:
               - 'FemLean/**'
               - 'FemLean.lean'
+              - 'lakefile.toml'
+              - 'lakefile.lean'
+              - 'lake-manifest.json'
+              - 'lean-toolchain'
+              - 'docbuild/**'
+            api:
               - 'lakefile.toml'
               - 'lakefile.lean'
               - 'lake-manifest.json'
@@ -55,6 +67,8 @@ jobs:
   build_project:
     needs: changes
     if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       needs.changes.outputs.lean == 'true' ||
       needs.changes.outputs.blueprint == 'true' ||
       needs.changes.outputs.homepage == 'true' ||
@@ -62,12 +76,81 @@ jobs:
     runs-on: ubuntu-24.04
     name: Build project
     steps:
+      - name: Checkout project
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Restore the previous generated site components
+        if: github.ref == 'refs/heads/main'
+        id: site-cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            home_page/blueprint
+            home_page/blueprint.pdf
+            home_page/docs
+          key: femlean-site-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: femlean-site-
+
+      - name: Check the generated component baseline
+        id: baseline
+        shell: bash
+        run: |
+          if [[ -f home_page/blueprint.pdf && -d home_page/blueprint && -d home_page/docs ]]; then
+            echo 'available=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'available=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Select the build mode
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASELINE_AVAILABLE: ${{ steps.baseline.outputs.available }}
+          LEAN_CHANGE: ${{ needs.changes.outputs.lean }}
+          API_CHANGE: ${{ needs.changes.outputs.api }}
+          BLUEPRINT_CHANGE: ${{ needs.changes.outputs.blueprint }}
+          WORKFLOW_CHANGE: ${{ needs.changes.outputs.workflow }}
+        run: |
+          full=false
+          if [[ "$EVENT_NAME" == 'schedule' || "$EVENT_NAME" == 'workflow_dispatch' ||
+                "$API_CHANGE" == 'true' || "$WORKFLOW_CHANGE" == 'true' ]]; then
+            full=true
+          fi
+          if [[ "$EVENT_NAME" != 'pull_request' && "$BASELINE_AVAILABLE" != 'true' ]]; then
+            full=true
+          fi
+
+          if [[ "$EVENT_NAME" == 'pull_request' ]]; then
+            lean=false
+            if [[ "$LEAN_CHANGE" == 'true' || "$BLUEPRINT_CHANGE" == 'true' ||
+                  "$WORKFLOW_CHANGE" == 'true' ]]; then
+              lean=true
+            fi
+            blueprint="$lean"
+            api=false
+          else
+            lean="$full"
+            if [[ "$LEAN_CHANGE" == 'true' || "$BLUEPRINT_CHANGE" == 'true' ||
+                  "$WORKFLOW_CHANGE" == 'true' ]]; then
+              lean=true
+            fi
+            blueprint="$lean"
+            api="$full"
+          fi
+
+          {
+            echo "full=$full"
+            echo "lean=$lean"
+            echo "blueprint=$blueprint"
+            echo "api=$api"
+          } >> "$GITHUB_OUTPUT"
+          echo "Build mode: full=$full, Lean=$lean, blueprint=$blueprint, API=$api" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Cleanup to free disk space
-        if: >-
-          github.event_name != 'pull_request' ||
-          needs.changes.outputs.lean == 'true' ||
-          needs.changes.outputs.blueprint == 'true' ||
-          needs.changes.outputs.workflow == 'true'
+        if: steps.mode.outputs.lean == 'true'
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.0
         with:
           tool-cache: false
@@ -78,17 +161,8 @@ jobs:
           docker-images: false
           swap-storage: false
 
-      - name: Checkout project
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0
-
       - name: Build and lint project
-        if: >-
-          github.event_name != 'pull_request' ||
-          needs.changes.outputs.lean == 'true' ||
-          needs.changes.outputs.blueprint == 'true' ||
-          needs.changes.outputs.workflow == 'true'
+        if: steps.mode.outputs.lean == 'true'
         uses: leanprover/lean-action@434f25c2f80ded67bba02502ad3a86f25db50709 # 2025-07-02
         with:
           build: true
@@ -98,18 +172,29 @@ jobs:
       - name: Compile blueprint and documentation
         uses: leanprover-community/docgen-action@deed0cdc44dd8e5de07a300773eb751d33e32fc8 # 2025-10-26
         with:
-          blueprint: ${{ github.event_name != 'pull_request' || needs.changes.outputs.lean == 'true' || needs.changes.outputs.blueprint == 'true' || needs.changes.outputs.workflow == 'true' }}
+          blueprint: ${{ steps.mode.outputs.blueprint }}
+          api-docs: ${{ steps.mode.outputs.api }}
           homepage: home_page
           deploy: false
 
+      - name: Save the complete generated site components
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: |
+            home_page/blueprint
+            home_page/blueprint.pdf
+            home_page/docs
+          key: femlean-site-${{ github.run_id }}-${{ github.run_attempt }}
+
       - name: Upload Pages artifact
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: home_page/_site
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     needs: build_project
     name: Deploy Pages
     runs-on: ubuntu-24.04
