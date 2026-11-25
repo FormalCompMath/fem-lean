@@ -14,5 +14,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.36.0"
 
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+rev = "master"
+
 [[lean_lib]]
 name = "FemLean"

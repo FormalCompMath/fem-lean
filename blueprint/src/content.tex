@@ -1,0 +1,144 @@
+\chapter{How to read this blueprint}
+
+This blueprint follows mathematical dependencies rather than the page order of
+Dietrich Braess's \emph{Finite Elements: Theory, Fast Solvers, and Applications
+in Elasticity Theory}, third English edition (2007). Statements are paraphrased;
+the edition, section, and page should be supplied when a node is refined into a
+formalization issue.
+
+A node with no \texttt{\textbackslash leanok} annotation is not yet formalized.
+The presence of a Lean declaration link does not replace human semantic review.
+Each mathematical PR records whether its definitions and statement have been
+checked independently. GitHub Projects tracks work flow; this blueprint tracks
+mathematical dependencies and formalization status.
+
+\chapter{Abstract variational and Galerkin theory}
+
+The immediate reference is Braess, Chapter II, Section 4. This chapter is the
+first milestone and deliberately has no mesh or concrete PDE dependency.
+
+\begin{definition}[Continuous bilinear form]
+  \label{def:continuous-bilinear-form}
+  Let $V$ be a real Hilbert space. A bilinear form $a:V\times V\to\mathbb R$
+  is continuous if there is a finite constant $M$ such that
+  $|a(u,v)|\le M\|u\|_V\|v\|_V$ for all $u,v\in V$.
+  The Lean statement must make the chosen bound and its nonnegativity explicit.
+\end{definition}
+
+\begin{definition}[Coercive bilinear form]
+  \label{def:coercive-bilinear-form}
+  A bilinear form $a$ on $V$ is coercive if there is $\alpha>0$ such that
+  $\alpha\|v\|_V^2\le a(v,v)$ for every $v\in V$.
+  Symmetry is not assumed unless a later theorem actually needs it.
+\end{definition}
+
+\begin{definition}[Weak solution]
+  \label{def:weak-solution}
+  \uses{def:continuous-bilinear-form}
+  Given a continuous linear functional $\ell$ on $V$, a weak solution is an
+  element $u\in V$ satisfying $a(u,v)=\ell(v)$ for every $v\in V$.
+\end{definition}
+
+\begin{definition}[Galerkin solution]
+  \label{def:galerkin-solution}
+  \uses{def:continuous-bilinear-form}
+  Let $V_h$ be a closed subspace of $V$. A Galerkin solution is $u_h\in V_h$
+  satisfying $a(u_h,v_h)=\ell(v_h)$ for every $v_h\in V_h$.
+  The representation of the discrete subspace is part of the M1 interface review.
+\end{definition}
+
+\begin{lemma}[Galerkin orthogonality]
+  \label{lem:galerkin-orthogonality}
+  \uses{def:weak-solution,def:galerkin-solution}
+  If $u$ is a weak solution and $u_h$ is the corresponding Galerkin solution on
+  $V_h$, then $a(u-u_h,v_h)=0$ for every $v_h\in V_h$.
+\end{lemma}
+
+\begin{theorem}[Céa's quasi-optimality theorem]
+  \label{thm:cea}
+  \uses{def:continuous-bilinear-form,def:coercive-bilinear-form,
+    def:weak-solution,def:galerkin-solution,lem:galerkin-orthogonality}
+  Assume that $a$ is continuous with constant $M$ and coercive with constant
+  $\alpha>0$. If $u$ is the weak solution and $u_h\in V_h$ is a Galerkin
+  solution, then
+  \[
+    \|u-u_h\|_V\le \frac{M}{\alpha}
+      \inf_{v_h\in V_h}\|u-v_h\|_V.
+  \]
+  Existence and uniqueness may be obtained through a separate Lax--Milgram
+  interface. Reviewers must check that symmetry has not been added accidentally.
+\end{theorem}
+
+\begin{corollary}[Exactness on the whole space]
+  \label{cor:galerkin-whole-space}
+  \uses{thm:cea}
+  When $V_h=V$, a Galerkin solution agrees with the weak solution. This is an
+  early compiled interface test, not merely an illustrative remark.
+\end{corollary}
+
+\chapter{Poisson model problem}
+
+The reference is Braess, Chapter II, Sections 1--4. Work here is blocked until
+RFC 0001 selects a Sobolev representation.
+
+\begin{definition}[Poisson weak problem]
+  \label{def:poisson-weak}
+  \uses{def:weak-solution}
+  \notready
+  On a bounded domain $\Omega$ with explicitly stated regularity and boundary
+  hypotheses, define the weak problem associated with $-\Delta u=f$ and
+  homogeneous Dirichlet boundary conditions. The precise choices of $f$, test
+  space, and boundary representation belong to RFC 0001 and its issues.
+\end{definition}
+
+\begin{proposition}[Poisson Galerkin quasi-optimality]
+  \label{prop:poisson-galerkin-cea}
+  \uses{def:poisson-weak,thm:cea}
+  \notready
+  The Poisson bilinear form satisfies the abstract continuity and coercivity
+  hypotheses, so every conforming Galerkin approximation inherits Céa's
+  quasi-optimality estimate.
+\end{proposition}
+
+\chapter{Two-dimensional affine $P_1$ elements}
+
+The reference is Braess, Chapter II, Sections 5--7. Mesh representation decisions
+are recorded in RFC 0002.
+
+\begin{definition}[Shape-regular triangular mesh family]
+  \label{def:shape-regular-mesh-family}
+  \notready
+  Define nondegenerate triangular cells, admissible meshes, and a shape-regular
+  family with an explicit uniform constant. Hanging nodes and boundary treatment
+  must either be supported or explicitly excluded.
+\end{definition}
+
+\begin{definition}[Affine $P_1$ finite element]
+  \label{def:affine-p1}
+  \uses{def:shape-regular-mesh-family}
+  \notready
+  Define the reference triangle, affine pullback, local linear polynomials, and
+  nodal basis. A sanity theorem must state that the basis satisfies the
+  Kronecker-delta property at the nodes.
+\end{definition}
+
+\begin{proposition}[$P_1$ conformity]
+  \label{prop:p1-conformity}
+  \uses{def:affine-p1,def:poisson-weak}
+  \notready
+  Under the mesh and boundary assumptions chosen for M3, the global piecewise
+  affine discrete space is a subspace of the Poisson test space.
+\end{proposition}
+
+\begin{theorem}[First-order energy error estimate]
+  \label{thm:p1-energy-error}
+  \uses{prop:poisson-galerkin-cea,prop:p1-conformity,thm:cea}
+  \notready
+  Under explicit $H^2$ regularity and shape-regularity hypotheses, the $P_1$
+  Galerkin solution satisfies
+  \[
+    \|u-u_h\|_{H^1(\Omega)}\le C h |u|_{H^2(\Omega)}.
+  \]
+  The final blueprint node must also record the interpolation results on which
+  the proof depends and the precise dependencies of $C$.
+\end{theorem}

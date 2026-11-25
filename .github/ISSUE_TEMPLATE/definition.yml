@@ -1,0 +1,52 @@
+name: Mathematical definition
+description: Propose or revise a reusable Lean definition
+title: "[Definition] "
+labels: ["kind: definition", "status: needs-specification"]
+body:
+  - type: textarea
+    id: object
+    attributes:
+      label: Intended mathematical object
+      description: Give the standard definition in prose or LaTeX.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      placeholder: Book edition, chapter, section, page, paper, or Mathlib reference
+    validations:
+      required: true
+  - type: textarea
+    id: representation
+    attributes:
+      label: Proposed Lean representation
+      description: Describe parameters, structures, subtypes, typeclasses, and alternatives considered.
+    validations:
+      required: true
+  - type: textarea
+    id: degenerate
+    attributes:
+      label: Degenerate cases and invariants
+      description: Empty domains, degenerate simplices, zero constants, boundary cases, and junk values.
+  - type: textarea
+    id: examples
+    attributes:
+      label: Sanity examples and downstream uses
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and related issues
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      options:
+        - label: The Lean definition is linked to an informal specification.
+          required: true
+        - label: At least one compiling sanity example is included.
+          required: true
+        - label: A non-author reviewer approves the mathematical meaning.
+          required: true

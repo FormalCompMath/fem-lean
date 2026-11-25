@@ -2,7 +2,14 @@
 /.venv/
 /docbuild/.lake/
 /blueprint/build/
+/blueprint/print/
 /blueprint/web/
+/blueprint/qa/
+/blueprint/lean_decls
+/home_page/_site/
+/home_page/.jekyll-cache/
+/home_page/blueprint/
+/home_page/docs/
 /references/
 *.olean
 *.ilean

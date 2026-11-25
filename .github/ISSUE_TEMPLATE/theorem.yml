@@ -1,0 +1,52 @@
+name: Theorem or proof
+description: Formalize a theorem, lemma, or proposition
+title: "[Theorem] "
+labels: ["kind: theorem", "status: needs-specification"]
+body:
+  - type: textarea
+    id: statement
+    attributes:
+      label: Informal mathematical statement
+      description: Include all hypotheses and the exact conclusion.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      placeholder: Book edition, chapter, section, page, or paper
+    validations:
+      required: true
+  - type: textarea
+    id: lean-statement
+    attributes:
+      label: Draft Lean statement
+      description: A proof placeholder is allowed in a linked Draft PR, never on main.
+  - type: textarea
+    id: differences
+    attributes:
+      label: Assumptions, quantifiers, and differences from the source
+      description: Record stronger hypotheses, weaker conclusions, norm choices, and constant dependencies.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependency issues and blueprint nodes
+  - type: input
+    id: declarations
+    attributes:
+      label: Expected Lean declaration names
+  - type: checkboxes
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      options:
+        - label: The statement receives semantic review before the proof is finalized.
+          required: true
+        - label: The proof builds without placeholders or new project axioms.
+          required: true
+        - label: A compiling example or downstream use checks the interface.
+          required: true
+        - label: The blueprint and declaration links are updated.
+          required: true
