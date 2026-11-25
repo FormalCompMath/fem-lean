@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main # Trigger on pushes to the default branch
+  pull_request:
   workflow_dispatch:        # Allow manual triggering of the workflow from the GitHub Actions interface
 
 # Cancel previous runs if a new commit is pushed to the same PR or branch
@@ -21,7 +22,7 @@ permissions:
 
 jobs:
   build_project:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     name: Build project
     steps:
       - name: Cleanup to free disk space
@@ -52,3 +53,4 @@ jobs:
         with:
           blueprint: true
           homepage: home_page
+          deploy: ${{ github.event_name == 'push' }}
