@@ -1,11 +1,11 @@
 # Repository configuration
 
-* @bombeuler
+* @bombeuler @oopjoy
 
 # Mathematical interfaces require their module owner in addition to CI.
-/FemLean/Core/ @bombeuler
-/FemLean/Analysis/ @bombeuler
-/FemLean/Geometry/ @bombeuler
-/FemLean/FiniteElement/ @bombeuler
-/docs/rfcs/ @bombeuler
-/blueprint/src/ @bombeuler
+/FemLean/Core/ @bombeuler @oopjoy
+/FemLean/Analysis/ @bombeuler @oopjoy
+/FemLean/Geometry/ @bombeuler @oopjoy
+/FemLean/FiniteElement/ @bombeuler @oopjoy
+/docs/rfcs/ @bombeuler @oopjoy
+/blueprint/src/ @bombeuler @oopjoy
