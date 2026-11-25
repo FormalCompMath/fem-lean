@@ -1,7 +1,7 @@
 title: FemLean
 description: Reusable, machine-checked finite element theory in Lean 4
-url: "https://FormalCompMath.github.io/fem-lean"
-baseurl: ""
+url: "https://formalcompmath.github.io"
+baseurl: "/fem-lean"
 lang: en-US
 repository: FormalCompMath/fem-lean
 github_username: FormalCompMath
