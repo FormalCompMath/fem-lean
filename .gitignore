@@ -6,6 +6,7 @@
 /blueprint/web/
 /blueprint/qa/
 /blueprint/lean_decls
+/blueprint/src/*.paux
 /home_page/_site/
 /home_page/.jekyll-cache/
 /home_page/blueprint/
