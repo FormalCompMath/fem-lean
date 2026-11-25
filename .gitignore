@@ -1,0 +1,10 @@
+/.lake/
+/.venv/
+/docbuild/.lake/
+/blueprint/build/
+/blueprint/web/
+/references/
+*.olean
+*.ilean
+*.trace
+.DS_Store
