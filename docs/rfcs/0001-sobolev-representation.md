@@ -1,5 +1,7 @@
 # RFC 0001: Sobolev space representation
 
+[中文版本](../zh-CN/rfcs/0001-sobolev-representation.md)
+
 - Status: Under review
 - Decision: pending
 - Target milestone: M2

@@ -1,5 +1,7 @@
 # Contributing to FemLean
 
+[中文版本](CONTRIBUTING.zh-CN.md)
+
 FemLean uses GitHub as the authoritative record for tasks, mathematical design,
 review, and progress. Quick chat is welcome, but decisions affecting definitions,
 interfaces, or milestones must be copied to an issue, PR, or RFC.

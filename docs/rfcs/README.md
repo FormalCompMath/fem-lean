@@ -1,5 +1,7 @@
 # Design RFCs
 
+[中文版本](../zh-CN/rfcs/README.md)
+
 An RFC is required for a mathematical representation or public interface that is
 expensive to reverse. Ordinary lemma additions do not need an RFC.
 
