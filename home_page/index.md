@@ -17,21 +17,15 @@ Reusable, machine-checked finite element theory in Lean 4.
 
 {: .note }
 The project is starting M1: abstract Galerkin theory and Céa's lemma, followed by a
-Poisson model problem and a two-dimensional \(P_1\) energy-error theorem.
+Poisson model problem and a two-dimensional $$P_1$$ energy-error theorem.
 
 ## Mathematical roadmap
 
 The project uses Braess's *Finite Elements* as a source of mathematical results,
 while Lean modules are organized by dependency rather than book chapter.
 
-The first vertical slice targets the abstract estimate
-
-\[
-  \|u-u_h\|_V \le \frac{M}{\alpha}
-  \inf_{v_h\in V_h}\|u-v_h\|_V,
-\]
-
-and then instantiates it for a concrete conforming finite element method.
+The first vertical slice connects abstract Galerkin theory to a concrete conforming
+finite element method.
 
 ## Project resources
 

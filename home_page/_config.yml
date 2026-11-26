@@ -41,3 +41,6 @@ gh_edit_repository: "https://github.com/FormalCompMath/fem-lean"
 gh_edit_branch: main
 gh_edit_source: home_page
 gh_edit_view_mode: edit
+
+kramdown:
+  math_engine: mathjax
