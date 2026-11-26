@@ -45,4 +45,13 @@ theorem isCoercive_iff_exists_coerciveWith (a : V →L[ℝ] V →L[ℝ] ℝ) :
     IsCoercive a ↔ ∃ α, CoerciveWith a α :=
   Iff.rfl
 
+/-- A weak solution satisfies the variational equation against every test in `V`. -/
+def IsWeakSolution (a : V →L[ℝ] V →L[ℝ] ℝ) (ℓ : V →L[ℝ] ℝ) (u : V) : Prop :=
+  ∀ v : V, a u v = ℓ v
+
+/-- A Galerkin solution belongs to `Vh` and satisfies the equation against every test in `Vh`. -/
+def IsGalerkinSolution (a : V →L[ℝ] V →L[ℝ] ℝ) (ℓ : V →L[ℝ] ℝ)
+    (Vh : Submodule ℝ V) (uh : Vh) : Prop :=
+  ∀ vh : Vh, a (uh : V) (vh : V) = ℓ (vh : V)
+
 end FemLean.Core.Variational
