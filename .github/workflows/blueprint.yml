@@ -148,21 +148,25 @@ jobs:
           lint: false
           mk_all-check: true
 
-      # The TeX container writes as root. Keep its output directory runner-owned
-      # so the following step can move the generated files without sudo.
-      - name: Prepare blueprint output directory
+      - name: Compile the blueprint PDF and HTML
         if: steps.mode.outputs.blueprint == 'true'
-        run: mkdir .generated-blueprint
-
-      - name: Compile blueprint and check its Lean declarations
-        if: steps.mode.outputs.blueprint == 'true'
-        uses: leanprover-community/docgen-action@deed0cdc44dd8e5de07a300773eb751d33e32fc8 # 2025-10-26
+        uses: xu-cheng/texlive-action@f886de8159e5952a131848a5fa9c3196a2132b5d # v2
         with:
-          blueprint: true
-          api-docs: false
-          build-page: false
-          homepage: .generated-blueprint
-          deploy: false
+          docker_image: ghcr.io/xu-cheng/texlive-full:20250401
+          run: |
+            set -eu
+            apk add --no-cache make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory "$(pwd)"
+            python3 -m venv /tmp/blueprint-env
+            . /tmp/blueprint-env/bin/activate
+            pip install --upgrade pip wheel
+            pip install requests pygraphviz leanblueprint
+            leanblueprint pdf
+            leanblueprint web
+
+      - name: Check declarations cited in the blueprint
+        if: steps.mode.outputs.blueprint == 'true'
+        run: lake exe checkdecls blueprint/lean_decls
 
       - name: Generate the API with the locked docbuild project
         if: steps.mode.outputs.api == 'true'
@@ -194,11 +198,12 @@ jobs:
         run: |
           mkdir -p .site-components
           if [[ "$BLUEPRINT" == true ]]; then
-            test -s .generated-blueprint/blueprint/index.html
-            test -s .generated-blueprint/blueprint.pdf
+            test -s blueprint/web/index.html
+            test -s blueprint/print/print.pdf
             rm -rf .site-components/blueprint
-            mv -T .generated-blueprint/blueprint .site-components/blueprint
-            mv -f .generated-blueprint/blueprint.pdf .site-components/blueprint.pdf
+            # Copy out of the root-owned TeX output as the runner.
+            cp -RT blueprint/web .site-components/blueprint
+            cp blueprint/print/print.pdf .site-components/blueprint.pdf
           fi
           if [[ "$API" == true ]]; then
             test -s docbuild/.lake/build/doc/index.html
@@ -220,7 +225,7 @@ jobs:
           key: femlean-site-v2-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Assemble the Pages site
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || steps.mode.outputs.api == 'true'
         run: |
           mv -T .site-components/blueprint home_page/_site/blueprint
           mv -T .site-components/docs home_page/_site/docs
