@@ -74,18 +74,32 @@ complete in that norm.
 
 \begin{theorem}[Céa's quasi-optimality theorem]
   \label{thm:cea}
+  \lean{FemLean.Core.Variational.cea}
   \uses{def:continuous-bilinear-form,def:coercive-bilinear-form,
     def:weak-solution,def:galerkin-solution,lem:galerkin-orthogonality}
-  Assume that $a$ is continuous with constant $M$ and coercive with constant
+  Assume that $a$ is bounded with constant $M\ge 0$ and coercive with constant
   $\alpha>0$. If $u$ is the weak solution and $u_h\in V_h$ is a Galerkin
   solution, then
   \[
     \|u-u_h\|_V\le \frac{M}{\alpha}
       \inf_{v_h\in V_h}\|u-v_h\|_V.
   \]
-  Existence and uniqueness may be obtained through a separate Lax--Milgram
-  interface. Reviewers must check that symmetry has not been added accidentally.
 \end{theorem}
+\begin{proof}
+  \uses{lem:galerkin-orthogonality}
+  Put $e=u-u_h$ and fix $v_h\in V_h$. Since $v_h-u_h\in V_h$, Galerkin
+  orthogonality gives $a(e,v_h-u_h)=0$. Splitting the second argument yields
+  \[
+    \alpha\|e\|_V^2 \le a(e,e)=a(e,u-v_h)
+       \le |a(e,u-v_h)|\le M\|e\|_V\|u-v_h\|_V .
+  \]
+  If $e\ne 0$, divide by $\alpha\|e\|_V$ to obtain
+  $\|e\|_V\le(M/\alpha)\|u-v_h\|_V$. The same bound holds when $e=0$
+  because the right-hand side is nonnegative. Take the infimum over $v_h$.
+  The distances form a nonempty set bounded below by zero, and multiplication
+  by the nonnegative factor $M/\alpha$ commutes with this infimum, including
+  when $M=0$.
+\end{proof}
 
 \begin{corollary}[Exactness on the whole space]
   \label{cor:galerkin-whole-space}
