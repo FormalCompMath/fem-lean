@@ -46,3 +46,22 @@ example {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     exact h ⟨v, Submodule.mem_top⟩
   · intro h vh
     exact h (vh : V)
+
+-- For a(x,y) = x₁ y₂ on the plane, reversing the slots changes the answer.
+-- The load is the second coordinate and the discrete space is the horizontal axis.
+example :
+    let ℓ := ContinuousLinearMap.snd ℝ ℝ ℝ
+    let a := (ContinuousLinearMap.fst ℝ ℝ ℝ).smulRight ℓ
+    let u : ℝ × ℝ := (1, 1)
+    let vh : ℓ.ker := ⟨(1, 0), rfl⟩
+    a (u - ((0 : ℓ.ker) : ℝ × ℝ)) vh = 0 ∧ a vh (u - ((0 : ℓ.ker) : ℝ × ℝ)) = 1 := by
+  intro ℓ a u vh
+  have hu : IsWeakSolution a ℓ u := fun v => one_mul v.2
+  have huh : IsGalerkinSolution a ℓ ℓ.ker 0 := by
+    intro v
+    change 0 * (v : ℝ × ℝ).2 = (v : ℝ × ℝ).2
+    rw [zero_mul]
+    exact v.property.symm
+  refine ⟨galerkin_orthogonality hu huh vh, ?_⟩
+  change 1 * (1 - 0 : ℝ) = 1
+  norm_num
