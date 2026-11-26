@@ -3,29 +3,122 @@ name: Compile blueprint
 on:
   push:
     branches:
-      - main # Trigger on pushes to the default branch
+      - main
   pull_request:
-  workflow_dispatch:        # Allow manual triggering of the workflow from the GitHub Actions interface
+  schedule:
+    # 02:23 Beijing time; refresh the complete API documentation nightly.
+    - cron: '23 18 * * *'
+  workflow_dispatch:
 
-# Cancel previous runs if a new commit is pushed to the same PR or branch
 concurrency:
-  group: ${{ github.ref }}  # Group runs by the ref (branch or PR)
-  cancel-in-progress: true  # Cancel any ongoing runs in the same group
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read          # Read access to repository contents
-  pages: write            # Write access to GitHub Pages
-  id-token: write         # Write access to ID tokens
-  issues: write           # Write access to issues
-  pull-requests: write    # Write access to pull requests
+  contents: read
+  pull-requests: read
 
 jobs:
+  changes:
+    name: Detect documentation changes
+    runs-on: ubuntu-24.04
+    outputs:
+      lean: ${{ steps.filter.outputs.lean }}
+      blueprint: ${{ steps.filter.outputs.blueprint }}
+      homepage: ${{ steps.filter.outputs.homepage }}
+      workflow: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed files
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            lean:
+              - 'FemLean/**'
+              - 'FemLean.lean'
+              - 'lakefile.toml'
+              - 'lakefile.lean'
+              - 'lake-manifest.json'
+              - 'lean-toolchain'
+              - 'docbuild/**'
+            blueprint:
+              - 'blueprint/**'
+            homepage:
+              - 'home_page/**'
+            workflow:
+              - '.github/workflows/blueprint.yml'
+
   build_project:
+    needs: changes
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
+      needs.changes.outputs.lean == 'true' ||
+      needs.changes.outputs.blueprint == 'true' ||
+      needs.changes.outputs.homepage == 'true' ||
+      needs.changes.outputs.workflow == 'true'
     runs-on: ubuntu-24.04
     name: Build project
     steps:
+      - name: Checkout project
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Restore the previous generated site components
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .site-components
+          key: femlean-site-v2-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: femlean-site-v2-
+
+      - name: Select the build mode
+        id: mode
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          LEAN_CHANGE: ${{ needs.changes.outputs.lean }}
+          BLUEPRINT_CHANGE: ${{ needs.changes.outputs.blueprint }}
+          WORKFLOW_CHANGE: ${{ needs.changes.outputs.workflow }}
+        run: |
+          blueprint=true
+          api=true
+          case "$EVENT_NAME" in
+            pull_request)
+              api=false
+              if [[ "$LEAN_CHANGE" != true && "$BLUEPRINT_CHANGE" != true && "$WORKFLOW_CHANGE" != true ]]; then
+                blueprint=false
+              fi
+              ;;
+            push)
+              # A cancelled push can leave the cached site several commits behind.
+              if [[ -s .site-components/docs/index.html && -s .site-components/blueprint/index.html &&
+                    -s .site-components/blueprint.pdf && -s .site-components/revision ]]; then
+                revision=$(<.site-components/revision)
+                if [[ "$revision" =~ ^[0-9a-f]{40}$ ]] && git merge-base --is-ancestor "$revision" HEAD &&
+                   git diff --quiet "$revision" HEAD -- lakefile.toml lakefile.lean lake-manifest.json \
+                     lean-toolchain docbuild .github/workflows/blueprint.yml; then
+                  api=false
+                  if git diff --quiet "$revision" HEAD -- FemLean FemLean.lean blueprint; then
+                    blueprint=false
+                  fi
+                fi
+              fi
+              ;;
+          esac
+          echo "blueprint=$blueprint" >> "$GITHUB_OUTPUT"
+          echo "api=$api" >> "$GITHUB_OUTPUT"
+          echo "Build blueprint: $blueprint; build API: $api" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Cleanup to free disk space
+        if: steps.mode.outputs.blueprint == 'true'
         uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.0
         with:
           tool-cache: false
@@ -36,33 +129,111 @@ jobs:
           docker-images: false
           swap-storage: false
 
-      - name: Checkout project
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
       - name: Build and lint project
+        if: steps.mode.outputs.blueprint == 'true'
         uses: leanprover/lean-action@434f25c2f80ded67bba02502ad3a86f25db50709 # 2025-07-02
         with:
           build: true
           lint: false
           mk_all-check: true
 
-      - name: Compile blueprint and documentation
-        uses: leanprover-community/docgen-action@deed0cdc44dd8e5de07a300773eb751d33e32fc8 # 2025-10-26
+      - name: Compile the blueprint PDF and HTML
+        if: steps.mode.outputs.blueprint == 'true'
+        uses: xu-cheng/texlive-action@f886de8159e5952a131848a5fa9c3196a2132b5d # v2
         with:
-          blueprint: true
-          homepage: home_page
-          deploy: false
+          docker_image: ghcr.io/xu-cheng/texlive-full:20250401
+          run: |
+            set -eu
+            apk add --no-cache make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory "$(pwd)"
+            python3 -m venv /tmp/blueprint-env
+            . /tmp/blueprint-env/bin/activate
+            pip install --upgrade pip requests wheel
+            pip install pygraphviz --config-settings="--global-option=build_ext" \
+              --config-settings="--global-option=-L/usr/lib/graphviz/" \
+              --config-settings="--global-option=-R/usr/lib/graphviz/"
+            pip install leanblueprint
+            leanblueprint pdf
+            leanblueprint web
+
+      - name: Check declarations cited in the blueprint
+        if: steps.mode.outputs.blueprint == 'true'
+        run: lake exe checkdecls blueprint/lean_decls
+
+      - name: Stage and verify the blueprint
+        if: steps.mode.outputs.blueprint == 'true'
+        run: |
+          mkdir -p .site-components
+          rm -rf .site-components/blueprint
+          # Copy out of the root-owned TeX output as the runner.
+          cp -RT blueprint/web .site-components/blueprint
+          cp blueprint/print/print.pdf .site-components/blueprint.pdf
+          test -s .site-components/blueprint/index.html
+          test -s .site-components/blueprint.pdf
+
+      - name: Install homepage dependencies
+        uses: ruby/setup-ruby@eaecf785f6a34567a6d97f686bbb7bccc1ac1e5c # v1.237.0
+        with:
+          working-directory: home_page
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      - name: Build the homepage
+        working-directory: home_page
+        env:
+          JEKYLL_ENV: production
+          JEKYLL_GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          bundle exec jekyll build
+          test -s _site/index.html
+          test -s _site/zh-CN/index.html
+
+      - name: Generate the API with the locked docbuild project
+        if: steps.mode.outputs.api == 'true'
+        working-directory: docbuild
+        run: lake build FemLean:docs
+
+      - name: Stage and verify the API
+        if: steps.mode.outputs.api == 'true'
+        run: |
+          test -s docbuild/.lake/build/doc/index.html
+          rm -rf .site-components/docs
+          mv -T docbuild/.lake/build/doc .site-components/docs
+
+      - name: Verify the complete site baseline
+        if: github.ref == 'refs/heads/main'
+        run: |
+          test -s .site-components/docs/index.html
+          test -s .site-components/blueprint/index.html
+          test -s .site-components/blueprint.pdf
+          git rev-parse HEAD > .site-components/revision
+
+      - name: Save the complete generated site components
+        if: success() && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: .site-components
+          key: femlean-site-v2-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Assemble the checked site components
+        if: github.ref == 'refs/heads/main' || steps.mode.outputs.blueprint == 'true'
+        env:
+          INCLUDE_API: ${{ github.ref == 'refs/heads/main' || steps.mode.outputs.api == 'true' }}
+        run: |
+          mv -T .site-components/blueprint home_page/_site/blueprint
+          mv .site-components/blueprint.pdf home_page/_site/
+          if [[ "$INCLUDE_API" == true ]]; then
+            mv -T .site-components/docs home_page/_site/docs
+          fi
 
       - name: Upload Pages artifact
-        if: github.event_name == 'push'
+        if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: home_page/_site
 
   deploy:
-    if: github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     needs: build_project
     name: Deploy Pages
     runs-on: ubuntu-24.04

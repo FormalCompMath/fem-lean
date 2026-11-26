@@ -19,19 +19,12 @@ usemathjax: true
 
 {: .note }
 项目正在进入 M1：抽象 Galerkin 理论和 Céa 引理，随后处理 Poisson 模型与二维
-\(P_1\) 能量误差估计。
+$$P_1$$ 能量误差估计。
 
 ## 数学路线
 
 项目以 Braess 的《Finite Elements》为数学路线图，Lean 模块按依赖关系而不是原书
-章节组织。第一条纵向路线首先建立抽象估计
-
-\[
-  \|u-u_h\|_V \le \frac{M}{\alpha}
-  \inf_{v_h\in V_h}\|u-v_h\|_V,
-\]
-
-随后将其用于具体的协调有限元方法。
+章节组织。第一条纵向路线将抽象 Galerkin 理论连接到具体的协调有限元方法。
 
 ## 中文项目文档
 
