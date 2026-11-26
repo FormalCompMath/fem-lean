@@ -7,7 +7,9 @@
 FemLean 应通过增加模块成长，而不是每增加一个结果就反复修改所有旧模块。仓库按
 数学依赖组织，不按 Braess 原书的章节顺序组织。
 
-[总规划](../../fem_lean_architecture_plan.md) 列出教材与模块的对应关系，并给出各层共用的 Poisson 验收算例。
+本文规定模块职责、导入规则和 Mathlib 复用范围。阶段验收以[路线图](roadmap.md)为准，
+表示方案由相应的 [RFC](rfcs/README.md) 记录。[总规划](../../fem_lean_architecture_plan.md)
+列出教材、参考实现与各模块的对应关系。
 
 ## 分层结构
 

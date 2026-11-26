@@ -39,7 +39,9 @@ in later milestones so the M1 core lands cleanly first.
   with a bounded polygonal Lipschitz domain in the Euclidean plane.
 - Add the required Lax–Milgram and Poincaré/Friedrichs results.
 - Define the Poisson weak problem with explicit domain and boundary hypotheses.
-- Instantiate the abstract Galerkin interface and derive quasi-optimality.
+- Establish boundedness, symmetry, and coercivity of the Dirichlet form in the
+  full $H^1$ norm, using Poincaré for coercivity. Use the same result for
+  Galerkin quasi-optimality here and reduced-matrix positivity in M3.
 
 ## M3 — Two-dimensional P1 element and assembly bridge
 
@@ -61,8 +63,11 @@ in later milestones so the M1 core lands cleanly first.
 
 ## M4 — First complete two-dimensional finite element error theorem
 
-- Establish the required 2D interpolation, affine scaling, and averaged Taylor /
-  Bramble–Hilbert results in `Approximation/`.
+- Establish the reference Bramble–Hilbert nodal estimate, affine scaling and
+  the sum of cell estimates in `Approximation/`. Justify nodal evaluation via
+  the continuous representative and prove that zero trace gives zero boundary
+  nodal values. The [blueprint](../blueprint/src/content.tex) records their
+  dependencies in the boundary-preserving approximation result.
 - For a fixed domain $\Omega$ and common shape bound $\kappa$, give one
   constant $C=C(\Omega,\kappa)$ for all meshes in the family and all
   unit-coefficient Poisson solutions $u\in H^2(\Omega)\cap H_0^1(\Omega)$.

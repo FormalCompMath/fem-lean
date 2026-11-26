@@ -8,8 +8,11 @@ FemLean should grow by adding modules, not by repeatedly modifying every existin
 module. The repository is organized by mathematical dependencies, not by the
 order of chapters in Braess's book.
 
-The [architecture plan (Chinese)](../fem_lean_architecture_plan.md) maps the
-book to the modules and gives the shared Poisson acceptance examples.
+This document defines module responsibilities, import rules, and Mathlib reuse.
+The [roadmap](roadmap.md) sets milestone acceptance criteria. Representation
+decisions belong in the [RFCs](rfcs/README.md). The
+[architecture plan (Chinese)](../fem_lean_architecture_plan.md) maps the book
+and the reference implementation to the modules.
 
 ## Layers
 

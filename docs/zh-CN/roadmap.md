@@ -37,7 +37,8 @@ Aubin–Nitsche、Strang 引理、鞍点理论以及 `Assembly/`）留到后续�
   开集 $\Omega$，首期取欧氏平面上的有界 Lipschitz 多边形域。
 - 补充或复用所需的 Lax–Milgram 和 Poincaré/Friedrichs 结果；
 - 在明确的区域和边界假设下定义 Poisson 弱问题；
-- 实例化抽象 Galerkin 接口并推出拟最优估计。
+- 在完整的 $H^1$ 范数下证明 Dirichlet 型的有界性、对称性和强制性，其中强制性用到
+  Poincaré 不等式。M2 的 Galerkin 拟最优估计与 M3 的消元矩阵正定性共用这一结果。
 
 ## M3 — 二维 P1 单元与装配桥梁
 
@@ -55,8 +56,9 @@ Aubin–Nitsche、Strang 引理、鞍点理论以及 `Assembly/`）留到后续�
 
 ## M4 — 第一条完整的二维有限元误差定理
 
-- 在 `Approximation/` 建立所需的二维插值、仿射缩放与平均 Taylor / Bramble–Hilbert
-  结果；
+- 在 `Approximation/` 建立参考元上的 Bramble–Hilbert 节点插值估计、仿射缩放和逐单元
+  求和。用连续代表元定义节点值，并证明零迹蕴含边界节点值为零。各结果如何共同给出
+  保持边界条件的逼近估计，见[数学蓝图](../../blueprint/src/content.tex)。
 - 固定区域 $\Omega$ 和统一的形状正则界 $\kappa$，对整个网格族及所有满足
   $u\in H^2(\Omega)\cap H_0^1(\Omega)$ 的单位系数 Poisson 解使用同一常数
   $C=C(\Omega,\kappa)$。先证明 Galerkin 解的误差界，再用 M3 的等价性推出下式。

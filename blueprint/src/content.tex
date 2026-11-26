@@ -109,9 +109,28 @@ RFC 0001 selects a Sobolev representation.
   space, and boundary representation belong to RFC 0001 and its issues.
 \end{definition}
 
+\begin{lemma}[Dirichlet Poincaré inequality]
+  \label{lem:dirichlet-poincare}
+  \uses{def:poisson-weak}
+  \notready
+  On the bounded Lipschitz domain $\Omega$ there is a constant $C_P$ such
+  that $\|v\|_{L^2(\Omega)}\le C_P\|\nabla v\|_{L^2(\Omega)}$ for every
+  $v\in H_0^1(\Omega)$.
+\end{lemma}
+
+\begin{proposition}[Poisson ellipticity]
+  \label{prop:poisson-ellipticity}
+  \uses{def:poisson-weak,lem:dirichlet-poincare}
+  \notready
+  In the full $H^1$ norm on $H_0^1(\Omega)$, the unit-coefficient Dirichlet
+  form $a(u,v)=\int_\Omega \nabla u\cdot\nabla v$ is symmetric and bounded
+  with $M=1$. The Dirichlet Poincaré inequality gives
+  $a(v,v)\ge (1+C_P^2)^{-1}\|v\|_{H^1(\Omega)}^2$.
+\end{proposition}
+
 \begin{proposition}[Poisson Galerkin quasi-optimality]
   \label{prop:poisson-galerkin-cea}
-  \uses{def:poisson-weak,thm:cea}
+  \uses{prop:poisson-ellipticity,thm:cea}
   \notready
   The Poisson bilinear form satisfies the abstract continuity and coercivity
   hypotheses, so every conforming Galerkin approximation inherits Céa's
@@ -186,7 +205,7 @@ and 0004 for the Sobolev, mesh and finite element representations.
 
 \begin{proposition}[Reduced Poisson system]
   \label{prop:poisson-reduced-system}
-  \uses{def:poisson-weak,prop:p1-dirichlet-reconstruction,prop:galerkin-coordinates}
+  \uses{prop:poisson-ellipticity,prop:p1-dirichlet-reconstruction,prop:galerkin-coordinates}
   \notready
   For the unit-coefficient Dirichlet Poisson problem, assemble the element
   integrals and eliminate the boundary coordinates. Then $K_0 U=F_0$ if and
@@ -195,16 +214,64 @@ and 0004 for the Sobolev, mesh and finite element representations.
   the injective $R_h^0$ gives a positive-definite reduced matrix.
 \end{proposition}
 
+\begin{lemma}[Nodal values of planar Sobolev functions]
+  \label{lem:h2-nodal-values}
+  \notready
+  On a bounded polygonal Lipschitz domain in the plane, every $H^2$ function
+  has a unique continuous representative on the closure. In particular,
+  vertex evaluation on the fixed reference triangle is bounded in its $H^2$ norm.
+\end{lemma}
+
+\begin{lemma}[Reference triangle interpolation estimate]
+  \label{lem:p1-reference-bramble-hilbert}
+  \uses{def:affine-p1,lem:h2-nodal-values}
+  \notready
+  On the fixed reference triangle $\widehat T$, nodal interpolation $\widehat I$
+  reproduces affine polynomials. Bounded vertex evaluation and the Bramble--Hilbert
+  lemma give $\|\widehat u-\widehat I\widehat u\|_{H^1(\widehat T)}
+  \le C_{\mathrm{ref}}|\widehat u|_{H^2(\widehat T)}$.
+\end{lemma}
+
+\begin{lemma}[Affine scaling on a shape-regular triangle]
+  \label{lem:p1-affine-scaling}
+  \uses{lem:p1-reference-bramble-hilbert,def:shape-regular-mesh-family}
+  \notready
+  Pull back by the reference-to-cell affine bijection. For
+  $h_T/\rho_T\le\kappa$, the interpolant $I_T$ satisfies
+  $|u-I_Tu|_{H^1(T)}\le C(\kappa)h_T|u|_{H^2(T)}$ and
+  $\|u-I_Tu\|_{L^2(T)}\le C(\kappa)h_T^2|u|_{H^2(T)}$.
+\end{lemma}
+
+\begin{proposition}[Local-to-global nodal interpolation]
+  \label{prop:p1-global-interpolation}
+  \uses{lem:h2-nodal-values,lem:p1-affine-scaling,prop:p1-conformity}
+  \notready
+  For $u\in H^2(\Omega)$, shared vertex values give one conforming interpolant
+  $I_hu$. Sum the squared cell estimates over the mesh, using $h_T\le h$
+  and $h\le\operatorname{diam}(\Omega)$, to obtain
+  $\|u-I_hu\|_{H^1(\Omega)}\le C(\Omega,\kappa)h|u|_{H^2(\Omega)}$.
+\end{proposition}
+
+\begin{lemma}[Preservation of homogeneous boundary values]
+  \label{lem:p1-boundary-preservation}
+  \uses{lem:h2-nodal-values,prop:p1-dirichlet-reconstruction}
+  \notready
+  For $u\in H^2(\Omega)\cap H_0^1(\Omega)$, the restriction of its
+  continuous representative to each boundary edge agrees almost everywhere
+  with its zero trace. Continuity gives zero on the entire edge, including
+  the endpoints. Thus $I_hu$ is the reconstruction of its interior nodal
+  values extended by zero and belongs to $V_h^0$.
+\end{lemma}
+
 \begin{proposition}[Boundary-preserving first-order approximation]
   \label{prop:p1-approximation}
-  \uses{def:shape-regular-mesh-family,prop:p1-dirichlet-reconstruction}
+  \uses{prop:p1-global-interpolation,lem:p1-boundary-preservation}
   \notready
   Fix $\Omega$ and a shape bound $\kappa$. There is a constant
   $C_{\mathrm{app}}(\Omega,\kappa)$ such that, for every mesh with that bound
   and every $u\in H^2(\Omega)\cap H_0^1(\Omega)$, there is a $w_h\in V_h^0$
   with $\|u-w_h\|_{H^1(\Omega)}\le C_{\mathrm{app}} h |u|_{H^2(\Omega)}$.
-  For nodal interpolation, evaluate the continuous representative of $u$
-  on the closed triangles and justify its zero boundary values.
+  Take $w_h=I_hu$ from the global interpolation and boundary preservation results.
 \end{proposition}
 
 \begin{theorem}[First-order energy error estimate]
