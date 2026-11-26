@@ -54,4 +54,11 @@ def IsGalerkinSolution (a : V →L[ℝ] V →L[ℝ] ℝ) (ℓ : V →L[ℝ] ℝ)
     (Vh : Submodule ℝ V) (uh : Vh) : Prop :=
   ∀ vh : Vh, a (uh : V) (vh : V) = ℓ (vh : V)
 
+/-- The error annihilates discrete tests in the second slot of the bilinear form. -/
+theorem galerkin_orthogonality {a : V →L[ℝ] V →L[ℝ] ℝ} {ℓ : V →L[ℝ] ℝ}
+    {Vh : Submodule ℝ V} {u : V} {uh : Vh}
+    (hu : IsWeakSolution a ℓ u) (huh : IsGalerkinSolution a ℓ Vh uh) (vh : Vh) :
+    a (u - (uh : V)) (vh : V) = 0 := by
+  rw [map_sub, sub_apply, hu, huh vh, sub_self]
+
 end FemLean.Core.Variational

@@ -64,9 +64,12 @@ complete in that norm.
 
 \begin{lemma}[Galerkin orthogonality]
   \label{lem:galerkin-orthogonality}
+  \lean{FemLean.Core.Variational.galerkin_orthogonality}
   \uses{def:weak-solution,def:galerkin-solution}
   If $u$ is a weak solution and $u_h$ is the corresponding Galerkin solution on
   $V_h$, then $a(u-u_h,v_h)=0$ for every $v_h\in V_h$.
+  Both equations have the same load on $v_h$. Subtracting them uses
+  linearity in the first argument and places the error in that argument.
 \end{lemma}
 
 \begin{theorem}[Céa's quasi-optimality theorem]
