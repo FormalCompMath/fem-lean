@@ -40,24 +40,36 @@ first milestone and deliberately has no mesh or concrete PDE dependency.
 
 \begin{definition}[Weak solution]
   \label{def:weak-solution}
+  \lean{FemLean.Core.Variational.IsWeakSolution}
   \uses{def:continuous-bilinear-form}
-  Given a continuous linear functional $\ell$ on $V$, a weak solution is an
-  element $u\in V$ satisfying $a(u,v)=\ell(v)$ for every $v\in V$.
+  Let $V$ be a real normed space, $a$ a continuous bilinear form on $V$, and
+  $\ell$ a continuous linear functional on $V$. A weak solution is an element
+  $u\in V$ satisfying $a(u,v)=\ell(v)$ for every $v\in V$.
 \end{definition}
 
 \begin{definition}[Galerkin solution]
   \label{def:galerkin-solution}
+  \lean{FemLean.Core.Variational.IsGalerkinSolution}
   \uses{def:continuous-bilinear-form}
-  Let $V_h$ be a closed subspace of $V$. A Galerkin solution is $u_h\in V_h$
+  Let $V_h$ be a linear subspace of $V$. A Galerkin solution is $u_h\in V_h$
   satisfying $a(u_h,v_h)=\ell(v_h)$ for every $v_h\in V_h$.
-  The representation of the discrete subspace is part of the M1 interface review.
 \end{definition}
+
+Existence is a separate question. To apply Lax--Milgram on $V_h$, one needs
+completeness in the inner-product norm used for the variational problem,
+as well as boundedness of the form and load and coercivity of the form on $V_h$.
+For a subspace with the inherited norm of a Hilbert space, completeness is
+equivalent to closedness. Finite-dimensional conforming spaces are automatically
+complete in that norm.
 
 \begin{lemma}[Galerkin orthogonality]
   \label{lem:galerkin-orthogonality}
+  \lean{FemLean.Core.Variational.galerkin_orthogonality}
   \uses{def:weak-solution,def:galerkin-solution}
   If $u$ is a weak solution and $u_h$ is the corresponding Galerkin solution on
   $V_h$, then $a(u-u_h,v_h)=0$ for every $v_h\in V_h$.
+  Both equations have the same load on $v_h$. Subtracting them uses
+  linearity in the first argument and places the error in that argument.
 \end{lemma}
 
 \begin{theorem}[Céa's quasi-optimality theorem]
