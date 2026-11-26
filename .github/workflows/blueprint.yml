@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       lean: ${{ steps.filter.outputs.lean }}
-      api: ${{ steps.filter.outputs.api }}
       blueprint: ${{ steps.filter.outputs.blueprint }}
       homepage: ${{ steps.filter.outputs.homepage }}
       workflow: ${{ steps.filter.outputs.workflow }}
@@ -43,12 +42,6 @@ jobs:
             lean:
               - 'FemLean/**'
               - 'FemLean.lean'
-              - 'lakefile.toml'
-              - 'lakefile.lean'
-              - 'lake-manifest.json'
-              - 'lean-toolchain'
-              - 'docbuild/**'
-            api:
               - 'lakefile.toml'
               - 'lakefile.lean'
               - 'lake-manifest.json'
@@ -80,7 +73,6 @@ jobs:
 
       - name: Restore the previous generated site components
         if: github.ref == 'refs/heads/main'
-        id: site-cache
         uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: .site-components
@@ -93,7 +85,6 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           LEAN_CHANGE: ${{ needs.changes.outputs.lean }}
-          API_CHANGE: ${{ needs.changes.outputs.api }}
           BLUEPRINT_CHANGE: ${{ needs.changes.outputs.blueprint }}
           WORKFLOW_CHANGE: ${{ needs.changes.outputs.workflow }}
         run: |
@@ -101,11 +92,9 @@ jobs:
           api=true
           case "$EVENT_NAME" in
             pull_request)
-              if [[ "$API_CHANGE" != true && "$WORKFLOW_CHANGE" != true ]]; then
-                api=false
-                if [[ "$LEAN_CHANGE" != true && "$BLUEPRINT_CHANGE" != true ]]; then
-                  blueprint=false
-                fi
+              api=false
+              if [[ "$LEAN_CHANGE" != true && "$BLUEPRINT_CHANGE" != true && "$WORKFLOW_CHANGE" != true ]]; then
+                blueprint=false
               fi
               ;;
             push)
@@ -168,10 +157,16 @@ jobs:
         if: steps.mode.outputs.blueprint == 'true'
         run: lake exe checkdecls blueprint/lean_decls
 
-      - name: Generate the API with the locked docbuild project
-        if: steps.mode.outputs.api == 'true'
-        working-directory: docbuild
-        run: lake build FemLean:docs
+      - name: Stage and verify the blueprint
+        if: steps.mode.outputs.blueprint == 'true'
+        run: |
+          mkdir -p .site-components
+          rm -rf .site-components/blueprint
+          # Copy out of the root-owned TeX output as the runner.
+          cp -RT blueprint/web .site-components/blueprint
+          cp blueprint/print/print.pdf .site-components/blueprint.pdf
+          test -s .site-components/blueprint/index.html
+          test -s .site-components/blueprint.pdf
 
       - name: Install homepage dependencies
         uses: ruby/setup-ruby@eaecf785f6a34567a6d97f686bbb7bccc1ac1e5c # v1.237.0
@@ -190,32 +185,25 @@ jobs:
           test -s _site/index.html
           test -s _site/zh-CN/index.html
 
-      - name: Replace rebuilt components and verify entry points
-        env:
-          BLUEPRINT: ${{ steps.mode.outputs.blueprint }}
-          API: ${{ steps.mode.outputs.api }}
-          PUBLISH: ${{ github.ref == 'refs/heads/main' }}
+      - name: Generate the API with the locked docbuild project
+        if: steps.mode.outputs.api == 'true'
+        working-directory: docbuild
+        run: lake build FemLean:docs
+
+      - name: Stage and verify the API
+        if: steps.mode.outputs.api == 'true'
         run: |
-          mkdir -p .site-components
-          if [[ "$BLUEPRINT" == true ]]; then
-            test -s blueprint/web/index.html
-            test -s blueprint/print/print.pdf
-            rm -rf .site-components/blueprint
-            # Copy out of the root-owned TeX output as the runner.
-            cp -RT blueprint/web .site-components/blueprint
-            cp blueprint/print/print.pdf .site-components/blueprint.pdf
-          fi
-          if [[ "$API" == true ]]; then
-            test -s docbuild/.lake/build/doc/index.html
-            rm -rf .site-components/docs
-            mv -T docbuild/.lake/build/doc .site-components/docs
-          fi
-          if [[ "$PUBLISH" == true ]]; then
-            test -s .site-components/docs/index.html
-            test -s .site-components/blueprint/index.html
-            test -s .site-components/blueprint.pdf
-            git rev-parse HEAD > .site-components/revision
-          fi
+          test -s docbuild/.lake/build/doc/index.html
+          rm -rf .site-components/docs
+          mv -T docbuild/.lake/build/doc .site-components/docs
+
+      - name: Verify the complete site baseline
+        if: github.ref == 'refs/heads/main'
+        run: |
+          test -s .site-components/docs/index.html
+          test -s .site-components/blueprint/index.html
+          test -s .site-components/blueprint.pdf
+          git rev-parse HEAD > .site-components/revision
 
       - name: Save the complete generated site components
         if: success() && github.ref == 'refs/heads/main'
@@ -224,12 +212,16 @@ jobs:
           path: .site-components
           key: femlean-site-v2-${{ github.run_id }}-${{ github.run_attempt }}
 
-      - name: Assemble the Pages site
-        if: github.ref == 'refs/heads/main' || steps.mode.outputs.api == 'true'
+      - name: Assemble the checked site components
+        if: github.ref == 'refs/heads/main' || steps.mode.outputs.blueprint == 'true'
+        env:
+          INCLUDE_API: ${{ github.ref == 'refs/heads/main' || steps.mode.outputs.api == 'true' }}
         run: |
           mv -T .site-components/blueprint home_page/_site/blueprint
-          mv -T .site-components/docs home_page/_site/docs
           mv .site-components/blueprint.pdf home_page/_site/
+          if [[ "$INCLUDE_API" == true ]]; then
+            mv -T .site-components/docs home_page/_site/docs
+          fi
 
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
