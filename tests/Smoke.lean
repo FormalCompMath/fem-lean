@@ -36,3 +36,13 @@ example : CoerciveWith (0 : (⊥ : Submodule ℝ ℝ) →L[ℝ] (⊥ : Submodule
   refine ⟨by norm_num, fun v => ?_⟩
   have hv : v = 0 := Subsingleton.elim _ _
   simp [hv]
+
+-- On the whole space the two predicates give exactly the same equation.
+example {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    (a : V →L[ℝ] V →L[ℝ] ℝ) (ℓ : V →L[ℝ] ℝ) (u : V) :
+    IsGalerkinSolution a ℓ ⊤ ⟨u, Submodule.mem_top⟩ ↔ IsWeakSolution a ℓ u := by
+  constructor
+  · intro h v
+    exact h ⟨v, Submodule.mem_top⟩
+  · intro h vh
+    exact h (vh : V)
