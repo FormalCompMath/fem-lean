@@ -23,3 +23,4 @@
 - [0001：Sobolev 空间表示](0001-sobolev-representation.md)
 - [0002：网格表示](0002-mesh-representation.md)
 - [0003：双线性型的有界性与强制性](0003-bilinear-form-interface.md)
+- [0004：有限元接口](0004-finite-element-interface.md)

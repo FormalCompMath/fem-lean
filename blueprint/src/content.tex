@@ -123,9 +123,28 @@ RFC 0001 selects a Sobolev representation.
   space, and boundary representation belong to RFC 0001 and its issues.
 \end{definition}
 
+\begin{lemma}[Dirichlet Poincaré inequality]
+  \label{lem:dirichlet-poincare}
+  \uses{def:poisson-weak}
+  \notready
+  On the bounded Lipschitz domain $\Omega$ there is a constant $C_P$ such
+  that $\|v\|_{L^2(\Omega)}\le C_P\|\nabla v\|_{L^2(\Omega)}$ for every
+  $v\in H_0^1(\Omega)$.
+\end{lemma}
+
+\begin{proposition}[Poisson ellipticity]
+  \label{prop:poisson-ellipticity}
+  \uses{def:poisson-weak,lem:dirichlet-poincare}
+  \notready
+  In the full $H^1$ norm on $H_0^1(\Omega)$, the unit-coefficient Dirichlet
+  form $a(u,v)=\int_\Omega \nabla u\cdot\nabla v$ is symmetric and bounded
+  with $M=1$. The Dirichlet Poincaré inequality gives
+  $a(v,v)\ge (1+C_P^2)^{-1}\|v\|_{H^1(\Omega)}^2$.
+\end{proposition}
+
 \begin{proposition}[Poisson Galerkin quasi-optimality]
   \label{prop:poisson-galerkin-cea}
-  \uses{def:poisson-weak,thm:cea}
+  \uses{prop:poisson-ellipticity,thm:cea}
   \notready
   The Poisson bilinear form satisfies the abstract continuity and coercivity
   hypotheses, so every conforming Galerkin approximation inherits Céa's
@@ -134,43 +153,172 @@ RFC 0001 selects a Sobolev representation.
 
 \chapter{Two-dimensional affine $P_1$ elements}
 
-The reference is Braess, Chapter II, Sections 5--7. Mesh representation decisions
-are recorded in RFC 0002.
+The references are Braess, Chapter II, Sections 4--8, and RFCs 0001, 0002
+and 0004 for the Sobolev, mesh and finite element representations.
+
+\begin{definition}[Triangulation of a fixed domain]
+  \label{def:fixed-domain-triangulation}
+  \notready
+  Fix a bounded polygonal Lipschitz domain $\Omega$ in the Euclidean plane.
+  Let $S_h$ be the union of the closed nondegenerate triangles of a finite
+  conforming mesh. Require $S_h=\overline{\Omega}$ and
+  $\operatorname{int}(S_h)=\Omega$. Distinct triangles meet in a common
+  face or have empty intersection. The edges incident to just one triangle
+  form the boundary of $\Omega$.
+\end{definition}
 
 \begin{definition}[Shape-regular triangular mesh family]
   \label{def:shape-regular-mesh-family}
+  \uses{def:fixed-domain-triangulation}
   \notready
-  Define nondegenerate triangular cells, admissible meshes, and a shape-regular
-  family with an explicit uniform constant. Hanging nodes and boundary treatment
-  must either be supported or explicitly excluded.
+  A family of triangulations of the same $\Omega$ has shape bound $\kappa$
+  if $h_T/\rho_T\le\kappa$ for every triangle $T$ of every mesh, where
+  $h_T$ is its diameter and $\rho_T$ its inradius. For each mesh set
+  $h=\max_T h_T$.
 \end{definition}
 
 \begin{definition}[Affine $P_1$ finite element]
   \label{def:affine-p1}
-  \uses{def:shape-regular-mesh-family}
   \notready
-  Define the reference triangle, affine pullback, local linear polynomials, and
-  nodal basis. A sanity theorem must state that the basis satisfies the
-  Kronecker-delta property at the nodes.
+  On a nondegenerate reference triangle the three vertex values uniquely
+  determine an affine polynomial. Transport the nodal basis to each physical
+  triangle by affine pullback. The basis satisfies the Kronecker-delta
+  property at its vertices.
 \end{definition}
 
 \begin{proposition}[$P_1$ conformity]
   \label{prop:p1-conformity}
-  \uses{def:affine-p1,def:poisson-weak}
+  \uses{def:affine-p1,def:fixed-domain-triangulation}
   \notready
-  Under the mesh and boundary assumptions chosen for M3, the global piecewise
-  affine discrete space is a subspace of the Poisson test space.
+  Local affine functions reconstructed from the same global nodal data agree
+  on each common edge, including when the two local vertex orders are reversed.
+  The reconstruction $R_h$ takes arbitrary vertex values into $H^1(\Omega)$.
+  Its weak gradient equals the cellwise affine gradient almost everywhere.
+\end{proposition}
+
+\begin{proposition}[Homogeneous Dirichlet reconstruction]
+  \label{prop:p1-dirichlet-reconstruction}
+  \uses{prop:p1-conformity}
+  \notready
+  Let $D_h^0$ be the coordinate space indexed by the interior vertices.
+  Extending its coordinates by zero at the boundary vertices and reconstructing
+  defines a linear injection $R_h^0:D_h^0\hookrightarrow H_0^1(\Omega)$.
+  Write $V_h^0=\operatorname{range}(R_h^0)$ for its image.
+\end{proposition}
+
+\begin{proposition}[Galerkin equations in coordinates]
+  \label{prop:galerkin-coordinates}
+  \uses{def:galerkin-solution}
+  \notready
+  Let $(\phi_j)$ be a basis of a finite-dimensional trial and test space and
+  write $RU=\sum_j U_j\phi_j$. Define $K_{ij}=a(\phi_j,\phi_i)$ and
+  $F_i=\ell(\phi_i)$. Then $a(RU,RW)=W^{\mathsf T}KU$ for all $U,W$, and
+  $KU=F$ holds exactly when $RU$ satisfies the Galerkin equation. This
+  coordinate identity also applies to nonsymmetric forms.
+\end{proposition}
+
+\begin{proposition}[Reduced Poisson system]
+  \label{prop:poisson-reduced-system}
+  \uses{prop:poisson-ellipticity,prop:p1-dirichlet-reconstruction,prop:galerkin-coordinates}
+  \notready
+  For the unit-coefficient Dirichlet Poisson problem, assemble the element
+  integrals and eliminate the boundary coordinates. Then $K_0 U=F_0$ if and
+  only if $R_h^0 U$ solves the Galerkin equation on $V_h^0$. The Dirichlet
+  form is symmetric and coercive on $H_0^1(\Omega)$. Its restriction along
+  the injective $R_h^0$ gives a positive-definite reduced matrix.
+\end{proposition}
+
+\begin{lemma}[Nodal values of planar Sobolev functions]
+  \label{lem:h2-nodal-values}
+  \notready
+  On a bounded polygonal Lipschitz domain in the plane, every $H^2$ function
+  has a unique continuous representative on the closure. In particular,
+  vertex evaluation on the fixed reference triangle is bounded in its $H^2$ norm.
+\end{lemma}
+
+\begin{lemma}[Reference triangle interpolation estimate]
+  \label{lem:p1-reference-bramble-hilbert}
+  \uses{def:affine-p1,lem:h2-nodal-values}
+  \notready
+  On the fixed reference triangle $\widehat T$, nodal interpolation $\widehat I$
+  reproduces affine polynomials. Bounded vertex evaluation and the Bramble--Hilbert
+  lemma give $\|\widehat u-\widehat I\widehat u\|_{H^1(\widehat T)}
+  \le C_{\mathrm{ref}}|\widehat u|_{H^2(\widehat T)}$.
+\end{lemma}
+
+\begin{lemma}[Affine scaling on a shape-regular triangle]
+  \label{lem:p1-affine-scaling}
+  \uses{lem:p1-reference-bramble-hilbert,def:shape-regular-mesh-family}
+  \notready
+  Pull back by the reference-to-cell affine bijection. For
+  $h_T/\rho_T\le\kappa$, the interpolant $I_T$ satisfies
+  $|u-I_Tu|_{H^1(T)}\le C(\kappa)h_T|u|_{H^2(T)}$ and
+  $\|u-I_Tu\|_{L^2(T)}\le C(\kappa)h_T^2|u|_{H^2(T)}$.
+\end{lemma}
+
+\begin{proposition}[Local-to-global nodal interpolation]
+  \label{prop:p1-global-interpolation}
+  \uses{lem:h2-nodal-values,lem:p1-affine-scaling,prop:p1-conformity}
+  \notready
+  For $u\in H^2(\Omega)$, shared vertex values give one conforming interpolant
+  $I_hu$. Sum the squared cell estimates over the mesh, using $h_T\le h$
+  and $h\le\operatorname{diam}(\Omega)$, to obtain
+  $\|u-I_hu\|_{H^1(\Omega)}\le C(\Omega,\kappa)h|u|_{H^2(\Omega)}$.
+\end{proposition}
+
+\begin{lemma}[Sobolev trace of a continuous representative]
+  \label{lem:trace-continuous-representative}
+  \notready
+  Let $\Omega$ be a bounded polygonal Lipschitz domain in the plane.
+  Suppose $u\in H^1(\Omega)$ has a representative $\tilde u$ continuous on
+  $\overline{\Omega}$. Then $\operatorname{Tr}u=\tilde u|_{\partial\Omega}$
+  almost everywhere with respect to arclength on $\partial\Omega$.
+  This is the trace compatibility needed from the Sobolev interface in RFC 0001.
+\end{lemma}
+
+\begin{lemma}[Preservation of homogeneous boundary values]
+  \label{lem:p1-boundary-preservation}
+  \uses{lem:h2-nodal-values,lem:trace-continuous-representative,prop:p1-global-interpolation,prop:p1-dirichlet-reconstruction}
+  \notready
+  For $u\in H^2(\Omega)\cap H_0^1(\Omega)$, the restriction of its
+  continuous representative to each boundary edge agrees almost everywhere
+  with its zero trace. Continuity gives zero on the entire edge, including
+  the endpoints. Thus $I_hu$ is the reconstruction of its interior nodal
+  values extended by zero and belongs to $V_h^0$.
+\end{lemma}
+
+\begin{proposition}[Boundary-preserving first-order approximation]
+  \label{prop:p1-approximation}
+  \uses{prop:p1-global-interpolation,lem:p1-boundary-preservation}
+  \notready
+  Fix $\Omega$ and a shape bound $\kappa$. There is a constant
+  $C_{\mathrm{app}}(\Omega,\kappa)$ such that, for every mesh with that bound
+  and every $u\in H^2(\Omega)\cap H_0^1(\Omega)$, there is a $w_h\in V_h^0$
+  with $\|u-w_h\|_{H^1(\Omega)}\le C_{\mathrm{app}} h |u|_{H^2(\Omega)}$.
+  Take $w_h=I_hu$ from the global interpolation and boundary preservation results.
 \end{proposition}
 
 \begin{theorem}[First-order energy error estimate]
   \label{thm:p1-energy-error}
-  \uses{prop:poisson-galerkin-cea,prop:p1-conformity,thm:cea}
+  \uses{prop:poisson-galerkin-cea,prop:p1-approximation}
   \notready
-  Under explicit $H^2$ regularity and shape-regularity hypotheses, the $P_1$
-  Galerkin solution satisfies
+  For the unit-coefficient Dirichlet Poisson problem, fix $\Omega$ and
+  $\kappa$. There exists $C=C(\Omega,\kappa)$ such that for every mesh
+  with this shape bound and every weak solution
+  $u\in H^2(\Omega)\cap H_0^1(\Omega)$, the Galerkin solution on $V_h^0$
+  satisfies
   \[
     \|u-u_h\|_{H^1(\Omega)}\le C h |u|_{H^2(\Omega)}.
   \]
-  The final blueprint node must also record the interpolation results on which
-  the proof depends and the precise dependencies of $C$.
 \end{theorem}
+
+\begin{corollary}[First-order error for the reduced matrix solution]
+  \label{cor:p1-reduced-matrix-error}
+  \uses{prop:poisson-reduced-system,thm:p1-energy-error}
+  \notready
+  With the same hypotheses and the same constant $C$, any solution of
+  $K_0 U=F_0$ satisfies
+  \[
+    \|u-R_h^0 U\|_{H^1(\Omega)}\le C h |u|_{H^2(\Omega)}.
+  \]
+\end{corollary}
