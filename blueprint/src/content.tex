@@ -19,16 +19,22 @@ first milestone and deliberately has no mesh or concrete PDE dependency.
 
 \begin{definition}[Continuous bilinear form]
   \label{def:continuous-bilinear-form}
+  \lean{FemLean.Core.Variational.BoundedBy,FemLean.Core.Variational.boundedBy_iff_opNorm_le}
   Let $V$ be a real Hilbert space. A bilinear form $a:V\times V\to\mathbb R$
   is continuous if there is a finite constant $M$ such that
   $|a(u,v)|\le M\|u\|_V\|v\|_V$ for all $u,v\in V$.
-  The Lean statement must make the chosen bound and its nonnegativity explicit.
+  The Lean predicate takes the chosen nonnegative bound as an argument and
+  applies to real normed spaces. For a bundled continuous bilinear form,
+  its pointwise estimate is equivalent to the operator-norm bound.
 \end{definition}
 
 \begin{definition}[Coercive bilinear form]
   \label{def:coercive-bilinear-form}
+  \lean{FemLean.Core.Variational.CoerciveWith,FemLean.Core.Variational.isCoercive_iff_exists_coerciveWith}
   A bilinear form $a$ on $V$ is coercive if there is $\alpha>0$ such that
   $\alpha\|v\|_V^2\le a(v,v)$ for every $v\in V$.
+  The Lean predicate takes $\alpha$ as an argument. Existential quantification
+  over this argument recovers Mathlib's coercivity predicate.
   Symmetry is not assumed unless a later theorem actually needs it.
 \end{definition}
 
