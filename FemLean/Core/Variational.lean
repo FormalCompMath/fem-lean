@@ -7,6 +7,7 @@ module
 
 public import Mathlib.Analysis.Normed.Operator.Bilinear
 public import Mathlib.Analysis.Normed.Operator.NormedSpace
+import Mathlib.Basic.Real.Pointwise
 
 /-!
 # Abstract variational problems
@@ -60,5 +61,35 @@ theorem galerkin_orthogonality {a : V →L[ℝ] V →L[ℝ] ℝ} {ℓ : V →L[�
     (hu : IsWeakSolution a ℓ u) (huh : IsGalerkinSolution a ℓ Vh uh) (vh : Vh) :
     a (u - (uh : V)) (vh : V) = 0 := by
   rw [map_sub, sub_apply, hu, huh vh, sub_self]
+
+/-- Céa's quasi-optimality estimate in the ambient norm (Braess II.4.2). -/
+theorem cea {a : V →L[ℝ] V →L[ℝ] ℝ} {ℓ : V →L[ℝ] ℝ}
+    {Vh : Submodule ℝ V} {u : V} {uh : Vh} {M α : ℝ}
+    (hbound : BoundedBy a M) (hcoer : CoerciveWith a α)
+    (hu : IsWeakSolution a ℓ u) (huh : IsGalerkinSolution a ℓ Vh uh) :
+    ‖u - (uh : V)‖ ≤ (M / α) * (⨅ vh : Vh, ‖u - (vh : V)‖) := by
+  have hratio := div_nonneg hbound.1 hcoer.1.le
+  rw [Real.mul_iInf_of_nonneg hratio]
+  apply le_ciInf
+  intro vh
+  let e := u - (uh : V)
+  change ‖e‖ ≤ (M / α) * ‖u - (vh : V)‖
+  rcases (norm_nonneg e).eq_or_lt with hz | he
+  · rw [← hz]
+    exact mul_nonneg hratio (norm_nonneg _)
+  have orth : a e ((vh : V) - (uh : V)) = 0 :=
+    galerkin_orthogonality hu huh (vh - uh)
+  have energy : a e e = a e (u - (vh : V)) := calc
+    a e e = a e ((u - (vh : V)) + ((vh : V) - (uh : V))) :=
+      congrArg (a e) (sub_add_sub_cancel _ _ _).symm
+    _ = _ := by rw [map_add, orth, add_zero]
+  have bound : (α * ‖e‖) * ‖e‖ ≤ (M * ‖u - (vh : V)‖) * ‖e‖ := calc
+    _ ≤ a e e := hcoer.2 e
+    _ = _ := energy
+    _ ≤ |a e (u - (vh : V))| := le_abs_self _
+    _ ≤ M * ‖e‖ * ‖u - (vh : V)‖ := hbound.2 _ _
+    _ = _ := mul_right_comm _ _ _
+  rw [div_mul_eq_mul_div, le_div_iff₀ hcoer.1, mul_comm ‖e‖]
+  exact (mul_le_mul_iff_left₀ he).mp bound
 
 end FemLean.Core.Variational

@@ -65,3 +65,17 @@ example :
   refine ⟨galerkin_orthogonality hu huh vh, ?_⟩
   change 1 * (1 - 0 : ℝ) = 1
   norm_num
+
+-- The zero form on a zero-dimensional ambient space admits M = 0 and α = 1.
+example :
+    let V := (⊥ : Submodule ℝ ℝ)
+    let S : Submodule ℝ V := ⊤
+    ‖(0 : V) - ((0 : S) : V)‖ ≤ (0 / 1 : ℝ) * (⨅ w : S, ‖(0 : V) - (w : V)‖) := by
+  intro V S
+  let a : V →L[ℝ] V →L[ℝ] ℝ := 0
+  have hb : BoundedBy a 0 := ⟨le_rfl, fun x y => by simp [a]⟩
+  have hc : CoerciveWith a 1 := by
+    refine ⟨zero_lt_one, fun v => ?_⟩
+    rw [Subsingleton.elim v 0]
+    simp [a]
+  exact cea (ℓ := 0) hb hc (fun _ => rfl) (fun _ => rfl)
