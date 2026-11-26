@@ -21,3 +21,4 @@ Current RFCs:
 
 - [0001: Sobolev space representation](0001-sobolev-representation.md)
 - [0002: Mesh representation](0002-mesh-representation.md)
+- [0003: Bounded and coercive bilinear forms](0003-bilinear-form-interface.md)
