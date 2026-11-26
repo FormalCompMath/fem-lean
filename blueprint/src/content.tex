@@ -252,9 +252,19 @@ and 0004 for the Sobolev, mesh and finite element representations.
   $\|u-I_hu\|_{H^1(\Omega)}\le C(\Omega,\kappa)h|u|_{H^2(\Omega)}$.
 \end{proposition}
 
+\begin{lemma}[Sobolev trace of a continuous representative]
+  \label{lem:trace-continuous-representative}
+  \notready
+  Let $\Omega$ be a bounded polygonal Lipschitz domain in the plane.
+  Suppose $u\in H^1(\Omega)$ has a representative $\tilde u$ continuous on
+  $\overline{\Omega}$. Then $\operatorname{Tr}u=\tilde u|_{\partial\Omega}$
+  almost everywhere with respect to arclength on $\partial\Omega$.
+  This is the trace compatibility needed from the Sobolev interface in RFC 0001.
+\end{lemma}
+
 \begin{lemma}[Preservation of homogeneous boundary values]
   \label{lem:p1-boundary-preservation}
-  \uses{lem:h2-nodal-values,prop:p1-dirichlet-reconstruction}
+  \uses{lem:h2-nodal-values,lem:trace-continuous-representative,prop:p1-global-interpolation,prop:p1-dirichlet-reconstruction}
   \notready
   For $u\in H^2(\Omega)\cap H_0^1(\Omega)$, the restriction of its
   continuous representative to each boundary edge agrees almost everywhere
