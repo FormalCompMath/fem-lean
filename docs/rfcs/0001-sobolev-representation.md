@@ -96,6 +96,14 @@ cast between domain representations is needed. Its openness proof uses finite
 coordinate intersections rather than the linear-order `Set.Ioo` API, which is
 inapplicable to the coordinate partial order on `Plane`.
 
+The generic signatures above accept supplied linear maps. For a concrete
+membership statement, the prototype uses the centre fan from
+[PR #25](https://github.com/FormalCompMath/fem-lean/pull/25). Its hat is one
+at the centre and zero on the four sides. `CentreHatMemH01` asks for an
+element of `H01` whose function and gradient components agree almost everywhere
+on the square with this hat and its four cell gradients. The prototype checks
+the centre value and type-checks the proposition. Proving it is M3 conformity work.
+
 ## Poincaré and existence path
 
 The external graph interface already provides

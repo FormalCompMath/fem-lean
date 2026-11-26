@@ -84,6 +84,12 @@ EllipticPdes.H1Graph.H01 volume Ω
 等式递归或不同区域表示之间的依赖类型转换。开性证明采用有限个坐标开集的交，而不能
 使用只适用于线序的 `Set.Ioo` 开性接口。
 
+上述通用签名接受给定的线性映射。为检验具体函数的成员关系，原型另取
+[PR #25](https://github.com/FormalCompMath/fem-lean/pull/25) 中的中心扇形网格。
+帽函数在中心取 1，在四条边上取 0。`CentreHatMemH01` 陈述：存在一个 `H01` 元素，
+其函数分量与梯度分量在正方形上几乎处处分别等于该帽函数及其逐单元梯度。
+原型核验中心取值，并对这条命题作类型检查。成员关系的证明属于 M3 的协调性工作。
+
 ## Poincaré 与存在性路径
 
 外部图接口已有 `EllipticPdes.H1Graph.poincare_H01_of_bounded`：由 `Ω` 有界得到

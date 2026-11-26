@@ -112,4 +112,29 @@ example {n : ℕ} (R : NodalReconstruction (unitSquare : Set Plane) (Fin n))
     (c : Fin n → ℝ) : R c ∈ LinearMap.range R :=
   ⟨c, rfl⟩
 
+/-- On the closed unit square this is the P1 centre hat: twice the distance to the nearest side. -/
+def centreHat (x : Plane) : ℝ :=
+  2 * min (min (x 0) (1 - x 0)) (min (x 1) (1 - x 1))
+
+/-- Gradient on the four open triangles of the centre fan. Ties on the diagonals
+are resolved by the branch order and do not affect the almost-everywhere statement. -/
+def centreHatCellGradient (x : Plane) : Plane :=
+  if x 0 ≤ x 1 then
+    if x 0 + x 1 ≤ 1 then EuclideanSpace.single 0 2 else EuclideanSpace.single 1 (-2)
+  else
+    if x 0 + x 1 ≤ 1 then EuclideanSpace.single 1 2 else EuclideanSpace.single 0 (-2)
+
+example : centreHat (WithLp.toLp 2 (fun _ : Fin 2 => (1 / 2 : ℝ))) = 1 := by
+  change 2 * min (min (1 / 2 : ℝ) (1 - 1 / 2)) (min (1 / 2) (1 - 1 / 2)) = 1
+  norm_num
+
+/-- RFC 0001 membership statement for the concrete centre hat in the mesh example of PR #25.
+M3 is to prove the existence of this graph element. -/
+def CentreHatMemH01 : Prop :=
+  ∃ U ∈ EllipticPdes.H1Graph.H01 volume (unitSquare : Set Plane),
+    (EllipticPdes.H1Graph.fnL U : Plane → ℝ) =ᵐ[volume.restrict (unitSquare : Set Plane)]
+      centreHat ∧
+    (EllipticPdes.H1Graph.gradL U : Plane → Plane) =ᵐ[volume.restrict (unitSquare : Set Plane)]
+      centreHatCellGradient
+
 end FemLean.Experiments.RFC0001
