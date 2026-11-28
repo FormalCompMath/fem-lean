@@ -93,14 +93,17 @@ storage layout, or an algorithm for finding a containing cell.
 - On the diagonal and centre-fan connectivities, the prototype derives zero
   and one free vertex respectively by counting incident cells. It also proves
   affine independence for all six triangles with their unit-square coordinates.
-  Geometric coverage and boundary equality remain separate certificate fields.
+  The [unit-square certificates](../../experiments/rfc0002/UnitSquare.lean)
+  construct `diagonalTriangulation` and `centreFanTriangulation` at the same
+  type `Triangulation unitSquare`. Barycentric weights certify the intersection
+  of every cell pair and coverage of the closed square. The edges with exactly
+  one incident cell form the frontier, and the interior of the support is the open square.
   Nonconforming **elements** can reuse this mesh with
   different degrees of freedom. Hanging-node **meshes** need a different
   intersection contract. A higher-dimensional version replaces local triples
   and edges with simplex vertices and facets.
 
-Follow-up tasks after independent review are to certify both unit-square
-meshes on the same open domain, construct the reference-to-cell affine
+Follow-up tasks after independent review are to construct the reference-to-cell affine
 equivalence from vertex data, and pass the certified boundary indices to the
 Dirichlet reconstruction of RFC 0004. Record the reviewer and accepted choice
 here when issue [#9](https://github.com/FormalCompMath/fem-lean/issues/9) is decided.

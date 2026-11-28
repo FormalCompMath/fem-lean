@@ -43,4 +43,6 @@ jobs:
         run: |
           lake build Mathlib.Geometry.Euclidean.Incenter.Basic Mathlib.Analysis.InnerProductSpace.PiL2 \
             Mathlib.Tactic.FinCases Mathlib.Tactic.Linarith
-          lake env lean experiments/rfc0002/TriangleMesh.lean
+          mkdir -p .lake/build/lib/lean/experiments/rfc0002
+          lake env lean -o .lake/build/lib/lean/experiments/rfc0002/TriangleMesh.olean experiments/rfc0002/TriangleMesh.lean
+          lake env lean experiments/rfc0002/UnitSquare.lean

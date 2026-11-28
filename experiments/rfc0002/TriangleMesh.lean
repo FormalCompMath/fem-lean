@@ -111,11 +111,11 @@ example : (diagonal.incident (diagonal.edge 0 1)).card = 2 := by decide
 example : diagonal.freeVertices = ∅ := by decide
 example : centreFan.freeVertices = {4} := by decide
 
-private def xy (x y : ℝ) : Plane := WithLp.toLp 2 ![x, y]
+def xy (x y : ℝ) : Plane := WithLp.toLp 2 ![x, y]
 
-private def corner : Fin 4 → Plane := ![xy 0 0, xy 1 0, xy 1 1, xy 0 1]
+def corner : Fin 4 → Plane := ![xy 0 0, xy 1 0, xy 1 1, xy 0 1]
 
-private noncomputable def fanPoint : Fin 5 → Plane :=
+noncomputable def fanPoint : Fin 5 → Plane :=
   ![corner 0, corner 1, corner 2, corner 3, xy (1/2) (1/2)]
 
 /-- Check a specific triple by the two coordinate equations and the sum of weights. -/
@@ -131,14 +131,14 @@ private lemma independent_of_coordinates (p : Fin 3 → Plane)
   simpa only [PiLp.add_apply, PiLp.smul_apply, smul_eq_mul, PiLp.zero_apply] using
     congrArg (fun x : Plane => x k) hv
 
-example (t : Fin 2) : AffineIndependent ℝ (fun i => corner (diagonal t i)) := by
+theorem diagonal_independent (t : Fin 2) : AffineIndependent ℝ (fun i => corner (diagonal t i)) := by
   apply independent_of_coordinates
   intro w hs hxy i
   have hx := hxy 0
   have hy := hxy 1
   fin_cases t <;> fin_cases i <;> norm_num [corner, diagonal, xy] at hx hy ⊢ <;> linarith
 
-example (t : Fin 4) : AffineIndependent ℝ (fun i => fanPoint (centreFan t i)) := by
+theorem centreFan_independent (t : Fin 4) : AffineIndependent ℝ (fun i => fanPoint (centreFan t i)) := by
   apply independent_of_coordinates
   intro w hs hxy i
   have hx := hxy 0
