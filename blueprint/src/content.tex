@@ -103,10 +103,22 @@ complete in that norm.
 
 \begin{corollary}[Exactness on the whole space]
   \label{cor:galerkin-whole-space}
+  \lean{FemLean.Core.Variational.galerkin_eq_weak_of_top}
   \uses{thm:cea}
-  When $V_h=V$, a Galerkin solution agrees with the weak solution. This is an
-  early compiled interface test, not merely an illustrative remark.
+  Under the hypotheses of C\'ea's theorem, let $u$ be a weak solution and
+  $u_h$ a Galerkin solution for the same form and load. If $V_h=V$, then
+  $u_h=u$ in the ambient space.
 \end{corollary}
+\begin{proof}
+  \uses{thm:cea}
+  Since $u\in V_h$, take $v_h=u$ in the best-approximation term. Every
+  distance is nonnegative and this choice attains zero, so the infimum is
+  zero. C\'ea's estimate gives
+  \[
+    0\le \|u-u_h\|_V\le (M/\alpha)\,0=0.
+  \]
+  Thus $u-u_h=0$ and $u_h=u$.
+\end{proof}
 
 \chapter{Poisson model problem}
 

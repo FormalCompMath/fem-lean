@@ -92,4 +92,23 @@ theorem cea {a : V →L[ℝ] V →L[ℝ] ℝ} {ℓ : V →L[ℝ] ℝ}
   rw [div_mul_eq_mul_div, le_div_iff₀ hcoer.1, mul_comm ‖e‖]
   exact (mul_le_mul_iff_left₀ he).mp bound
 
+/-- On the whole trial space, Céa's estimate identifies the Galerkin solution
+with the weak solution for the same load. -/
+theorem galerkin_eq_weak_of_top {a : V →L[ℝ] V →L[ℝ] ℝ} {ℓ : V →L[ℝ] ℝ}
+    {u : V} {uh : (⊤ : Submodule ℝ V)} {M α : ℝ}
+    (hbound : BoundedBy a M) (hcoer : CoerciveWith a α)
+    (hu : IsWeakSolution a ℓ u) (huh : IsGalerkinSolution a ℓ ⊤ uh) :
+    (uh : V) = u := by
+  let v : (⊤ : Submodule ℝ V) := ⟨u, Submodule.mem_top⟩
+  have best : (⨅ w : (⊤ : Submodule ℝ V), ‖u - (w : V)‖) = 0 := by
+    apply le_antisymm _ (le_ciInf fun _ => norm_nonneg _)
+    calc
+      _ ≤ ‖u - (v : V)‖ :=
+        ciInf_le (f := fun w : (⊤ : Submodule ℝ V) => ‖u - (w : V)‖)
+          ⟨0, Set.forall_mem_range.mpr fun _ => norm_nonneg _⟩ v
+      _ = 0 := by simp [v]
+  have err := cea hbound hcoer hu huh
+  rw [best, mul_zero, norm_le_zero_iff, sub_eq_zero] at err
+  exact err.symm
+
 end FemLean.Core.Variational
