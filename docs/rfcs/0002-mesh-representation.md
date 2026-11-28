@@ -70,4 +70,40 @@ $\Omega$ from [RFC 0001](0001-sobolev-representation.md).
 
 ## Decision record
 
-Pending semantic and Lean API review.
+**Proposal for review, 2026-11-28.** Use option 2 for the analytic interface.
+Keep global vertex IDs and each cell's ordered triple. A single injective
+coordinate map and a proof of affine independence produce the Mathlib triangle.
+The [Lean prototype](../../experiments/rfc0002/TriangleMesh.lean) uses finite
+indices to make incidence computable. It does not prescribe a mesh file format,
+storage layout, or an algorithm for finding a containing cell.
+
+- A coordinate-only representation (option 1) would make assembly recover
+  shared IDs from equality of points. The indexed representation requires a
+  compatibility certificate once at mesh construction and provides these IDs
+  directly to assembly. An executable mesh (option 3) can later provide the
+  same data and certificate without changing the analytic interface.
+- The intersection of distinct closed cells must equal the convex hull of their
+  common vertices. A vertex touching the interior of an unsplit neighbouring
+  edge violates this equality. Affine independence excludes collinear vertices;
+  the unordered vertex sets distinguish cells even under reordering.
+- The domain is an external parameter. The family has one shape bound for
+  every cell of every mesh. Mathlib supplies the positive inradius, so the
+  multiplicative bound is equivalent to the usual diameter/inradius ratio.
+  The pullback test transports affine nodal values with barycentric weights.
+- On the diagonal and centre-fan connectivities, the prototype derives zero
+  and one free vertex respectively by counting incident cells. It also proves
+  affine independence for all six triangles with their unit-square coordinates.
+  The [unit-square certificates](../../experiments/rfc0002/UnitSquare.lean)
+  construct `diagonalTriangulation` and `centreFanTriangulation` at the same
+  type `Triangulation unitSquare`. Barycentric weights certify the intersection
+  of every cell pair and coverage of the closed square. The edges with exactly
+  one incident cell form the frontier, and the interior of the support is the open square.
+  Nonconforming **elements** can reuse this mesh with
+  different degrees of freedom. Hanging-node **meshes** need a different
+  intersection contract. A higher-dimensional version replaces local triples
+  and edges with simplex vertices and facets.
+
+Follow-up tasks after independent review are to construct the reference-to-cell affine
+equivalence from vertex data, and pass the certified boundary indices to the
+Dirichlet reconstruction of RFC 0004. Record the reviewer and accepted choice
+here when issue [#9](https://github.com/FormalCompMath/fem-lean/issues/9) is decided.
