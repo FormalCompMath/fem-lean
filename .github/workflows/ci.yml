@@ -38,3 +38,9 @@ jobs:
         run: |
           lake build EllipticPdes.Poincare.GraphBounded
           lake env lean experiments/rfc0001/EllipticPDE.lean
+
+      - name: Check the RFC 0002 mesh prototype
+        run: |
+          lake build Mathlib.Geometry.Euclidean.Incenter.Basic Mathlib.Analysis.InnerProductSpace.PiL2 \
+            Mathlib.Tactic.FinCases Mathlib.Tactic.Linarith
+          lake env lean experiments/rfc0002/TriangleMesh.lean
