@@ -11,12 +11,12 @@ import Mathlib.Tactic.NormNum
 
 open FemLean.Core.Variational
 
-example : BoundedBy (ContinuousLinearMap.mul ℝ ℝ) 1 := by
+private theorem realMul_boundedBy : BoundedBy (ContinuousLinearMap.mul ℝ ℝ) 1 := by
   refine ⟨by norm_num, fun u v => ?_⟩
   change |u * v| ≤ 1 * ‖u‖ * ‖v‖
   simp [abs_mul, Real.norm_eq_abs]
 
-example : CoerciveWith (ContinuousLinearMap.mul ℝ ℝ) 1 := by
+private theorem realMul_coerciveWith : CoerciveWith (ContinuousLinearMap.mul ℝ ℝ) 1 := by
   refine ⟨by norm_num, fun v => ?_⟩
   change 1 * ‖v‖ * ‖v‖ ≤ v * v
   rw [one_mul, Real.norm_eq_abs, ← pow_two, sq_abs, pow_two]
@@ -46,6 +46,15 @@ example {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
     exact h ⟨v, Submodule.mem_top⟩
   · intro h vh
     exact h (vh : V)
+
+-- For a(u,v) = uv and ℓ(v) = v the weak solution is 1. Any full-space
+-- Galerkin solution must equal it, even when given as a separate candidate.
+example (uh : (⊤ : Submodule ℝ ℝ))
+    (huh : IsGalerkinSolution (ContinuousLinearMap.mul ℝ ℝ) (ContinuousLinearMap.id ℝ ℝ) ⊤ uh) :
+    (uh : ℝ) = 1 := by
+  have hu : IsWeakSolution (ContinuousLinearMap.mul ℝ ℝ) (ContinuousLinearMap.id ℝ ℝ) 1 :=
+    fun v => one_mul v
+  exact galerkin_eq_weak_of_top realMul_boundedBy realMul_coerciveWith hu huh
 
 -- For a(x,y) = x₁ y₂ on the plane, reversing the slots changes the answer.
 -- The load is the second coordinate and the discrete space is the horizontal axis.
